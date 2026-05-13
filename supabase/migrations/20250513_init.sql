@@ -49,13 +49,13 @@ create policy "Users can view their own profile"
   on users for select
   using (auth.uid() = id);
 
+create policy "Users can create their own profile"
+  on users for insert
+  with check (auth.uid() = id);
+
 create policy "Users can update their own profile"
   on users for update
   using (auth.uid() = id);
-
-create policy "Users can insert their own profile"
-  on users for insert
-  with check (auth.uid() = id);
 
 -- Create policies for projects table
 create policy "Users can view their own projects"
