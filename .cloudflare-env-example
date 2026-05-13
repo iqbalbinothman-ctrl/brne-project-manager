@@ -1,0 +1,6 @@
+# Cloudflare Pages Environment Variables
+# Add these in your Cloudflare Pages dashboard:
+# Settings > Environment variables > Production
+
+VITE_SUPABASE_URL=https://fwveqnghphjmkfbmwofg.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_CHrEqH5KlcdIkjULKfBSOw_DTHojmae
