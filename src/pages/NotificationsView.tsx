@@ -27,7 +27,7 @@ export default function NotificationsView() {
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
-    <div className="p-8 lg:p-12 max-w-4xl mx-auto animate-in fade-in duration-500 h-full flex flex-col">
+    <div className="p-8 lg:p-12 max-w-4xl mx-auto animate-in fade-in duration-500 flex flex-col pb-16">
       <div className="flex justify-between items-end mb-8">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Notifications</h2>

@@ -15,7 +15,7 @@ export default function Dashboard() {
   const activeProjectsList = projects.filter(p => p.status !== 'Completed').slice(0, 4);
 
   return (
-    <div className="max-w-[1400px] mx-auto h-full grid grid-cols-1 lg:grid-cols-12 gap-8 p-8 lg:p-12 animate-in fade-in duration-500 pb-24">
+    <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 p-8 lg:p-12 animate-in fade-in duration-500 pb-16">
 
       {/* LEFT COLUMN */}
       <div className="lg:col-span-7 xl:col-span-8 flex flex-col space-y-8 pt-4">

@@ -39,7 +39,7 @@ export default function Projects() {
   }
 
   return (
-    <div className="p-8 lg:p-12 max-w-6xl mx-auto animate-in fade-in duration-500 h-full">
+    <div className="p-8 lg:p-12 max-w-6xl mx-auto animate-in fade-in duration-500 pb-16">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold">Projects</h2>
         <button
@@ -270,8 +270,8 @@ function ProjectDetail({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div className="p-8 lg:p-12 max-w-6xl mx-auto animate-in slide-in-from-right-4 duration-300">
-      <button 
+    <div className="p-8 lg:p-12 max-w-6xl mx-auto animate-in slide-in-from-right-4 duration-300 pb-16">
+      <button
         onClick={() => setSelectedProjectId(null)}
         className="text-sm font-semibold text-gray-400 hover:text-black mb-8 flex items-center transition-colors px-4 py-2 bg-gray-50 rounded-full w-fit hover:bg-gray-100"
       >
@@ -747,7 +747,7 @@ function TaskDetail({ task, projectId }: { task: Task; projectId: string }) {
   };
 
   return (
-    <div className="p-8 lg:p-12 max-w-6xl mx-auto animate-in slide-in-from-right-4 duration-300">
+    <div className="p-8 lg:p-12 max-w-6xl mx-auto animate-in slide-in-from-right-4 duration-300 pb-16">
       <button
         onClick={() => setSelectedTaskId(null)}
         className="text-sm font-semibold text-gray-400 hover:text-black mb-8 flex items-center transition-colors px-4 py-2 bg-gray-50 rounded-full w-fit hover:bg-gray-100"

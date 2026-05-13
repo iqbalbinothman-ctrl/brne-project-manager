@@ -44,7 +44,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="p-8 max-w-md">
+    <div className="p-8 max-w-md pb-16">
       <h1 className="text-3xl font-bold mb-8">Settings</h1>
 
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 space-y-6">

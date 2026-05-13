@@ -17,7 +17,7 @@ export default function FilesView() {
   })).filter(p => p.resourceLinks.length > 0);
 
   return (
-    <div className="p-8 lg:p-12 max-w-6xl mx-auto animate-in fade-in duration-500 w-full flex flex-col">
+    <div className="p-8 lg:p-12 max-w-6xl mx-auto animate-in fade-in duration-500 w-full flex flex-col pb-16">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Resource Links</h2>

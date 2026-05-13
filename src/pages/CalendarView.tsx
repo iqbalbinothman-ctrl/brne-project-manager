@@ -28,7 +28,7 @@ export default function CalendarView() {
   }
 
   return (
-    <div className="p-8 lg:p-12 max-w-7xl mx-auto animate-in fade-in duration-500 w-full flex flex-col">
+    <div className="p-8 lg:p-12 max-w-7xl mx-auto animate-in fade-in duration-500 w-full flex flex-col pb-16">
       <div className="flex items-center justify-between mb-8 shrink-0">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 border border-blue-100 shadow-sm">
@@ -138,7 +138,7 @@ function DayDetailView({ day, tasks, projects, onBack }: { day: Date; tasks: any
   const { setSelectedProjectId, setSelectedTaskId } = useAppContext();
 
   return (
-    <div className="p-8 lg:p-12 max-w-6xl mx-auto animate-in slide-in-from-right-4 duration-300 h-full overflow-y-auto">
+    <div className="p-8 lg:p-12 max-w-6xl mx-auto animate-in slide-in-from-right-4 duration-300 pb-16">
       <button
         onClick={onBack}
         className="text-sm font-semibold text-gray-400 hover:text-black mb-8 flex items-center transition-colors px-4 py-2 bg-gray-50 rounded-full w-fit hover:bg-gray-100"
