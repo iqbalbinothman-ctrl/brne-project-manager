@@ -41,11 +41,11 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children, session }: { children: ReactNode, session: Session }) => {
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [users] = useState<User[]>(initialUsers);
   const [files] = useState<AppFile[]>(initialFiles);
-  const [notifications, setNotifications] = useState<NotificationRecord[]>(initialNotifs);
+  const [notifications, setNotifications] = useState<NotificationRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
@@ -287,6 +287,17 @@ export const AppProvider = ({ children, session }: { children: ReactNode, sessio
 
     loadData();
 
+    // Subscribe to real-time updates for users (profile changes)
+    const usersChannel = supabase
+      .channel('users')
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${session.user.id}` },
+        (payload) => {
+          setCurrentUser(payload.new as User);
+        }
+      )
+      .subscribe();
+
     // Subscribe to real-time updates for projects
     const projectsChannel = supabase
       .channel('projects')
@@ -310,6 +321,7 @@ export const AppProvider = ({ children, session }: { children: ReactNode, sessio
       .subscribe();
 
     return () => {
+      supabase.removeChannel(usersChannel);
       supabase.removeChannel(projectsChannel);
       supabase.removeChannel(tasksChannel);
     };
