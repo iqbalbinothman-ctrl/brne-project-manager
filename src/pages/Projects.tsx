@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../AppContext';
+import { Task } from '../types';
 import { format, parseISO, addDays } from 'date-fns';
 import { ChevronRight, Plus, Users, Clock, CheckSquare, MessageSquare, Paperclip, AlertCircle, Circle, FolderKanban, X, Trash2, Link as LinkIcon, ExternalLink } from 'lucide-react';
 
