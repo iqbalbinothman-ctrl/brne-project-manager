@@ -254,8 +254,16 @@ export const AppProvider = ({ children, session }: { children: ReactNode, sessio
 
         if (userData) {
           setCurrentUser(userData as User);
-        } else if (userError && userError.code !== 'PGRST116') {
-          // PGRST116 means no rows found, which is expected for new users
+        } else if (userError && userError.code === 'PGRST116') {
+          // No user profile found - create a default one
+          console.log('No user profile found, using email:', session.user.email);
+          setCurrentUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            name: session.user.email?.split('@')[0] || 'User',
+            initials: session.user.email?.charAt(0).toUpperCase() || '?',
+          });
+        } else {
           throw userError;
         }
 
@@ -278,8 +286,6 @@ export const AppProvider = ({ children, session }: { children: ReactNode, sessio
         if (tasksData) setTasks(tasksData as Task[]);
       } catch (error) {
         console.error('Failed to load data from Supabase:', error);
-        // Fall back to initial data
-        setCurrentUser(users[0]);
       } finally {
         setLoading(false);
       }
