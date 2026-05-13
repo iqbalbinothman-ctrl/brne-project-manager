@@ -38,8 +38,22 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [projects, setProjects] = useState<Project[]>(() => {
+    try {
+      const saved = localStorage.getItem('projects');
+      return saved ? JSON.parse(saved) : initialProjects;
+    } catch {
+      return initialProjects;
+    }
+  });
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    try {
+      const saved = localStorage.getItem('tasks');
+      return saved ? JSON.parse(saved) : initialTasks;
+    } catch {
+      return initialTasks;
+    }
+  });
   const [users] = useState<User[]>(initialUsers);
   const [files] = useState<AppFile[]>(initialFiles);
   const [notifications, setNotifications] = useState<NotificationRecord[]>(initialNotifs);
