@@ -226,18 +226,28 @@ export const AppProvider = ({ children, session }: { children: ReactNode, sessio
   const updateCurrentUser = async (updates: Partial<User>) => {
     if (!currentUser) return;
 
-    const updatedUser = { ...currentUser, ...updates };
-    setCurrentUser(updatedUser);
+    const optimisticUser = { ...currentUser, ...updates };
+    setCurrentUser(optimisticUser);
 
-    const { error } = await supabase
-      .from('users')
-      .update(updates)
-      .eq('id', session.user.id);
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .update(updates)
+        .eq('id', session.user.id)
+        .select()
+        .single();
 
-    if (error) {
+      if (error) throw error;
+
+      // Set the confirmed data from the database
+      if (data) {
+        setCurrentUser(data as User);
+      }
+    } catch (error) {
       console.error('Failed to update user profile:', error);
       // Revert on error
       setCurrentUser(currentUser);
+      throw error;
     }
   };
 
@@ -299,7 +309,10 @@ export const AppProvider = ({ children, session }: { children: ReactNode, sessio
       .on('postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${session.user.id}` },
         (payload) => {
-          setCurrentUser(payload.new as User);
+          // Use a small delay to avoid race conditions with optimistic updates
+          setTimeout(() => {
+            setCurrentUser(payload.new as User);
+          }, 100);
         }
       )
       .subscribe();
