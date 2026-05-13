@@ -10,6 +10,7 @@ import Projects from './pages/Projects';
 import CalendarView from './pages/CalendarView';
 import FilesView from './pages/FilesView';
 import NotificationsView from './pages/NotificationsView';
+import Settings from './pages/Settings';
 
 function AppContent() {
   const { activeTab } = useAppContext();
@@ -21,6 +22,7 @@ function AppContent() {
       case 'calendar': return <CalendarView />;
       case 'files': return <FilesView />;
       case 'notifications': return <NotificationsView />;
+      case 'settings': return <Settings />;
       default: return <Dashboard />;
     }
   };

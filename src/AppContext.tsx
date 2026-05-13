@@ -10,7 +10,7 @@ interface AppContextType {
   users: User[];
   files: AppFile[];
   notifications: NotificationRecord[];
-  currentUser: User;
+  currentUser: User | null;
 
   // App state
   activeTab: string;
@@ -29,6 +29,7 @@ interface AppContextType {
   deleteTask: (taskId: string) => void;
   updateTaskDeadline: (taskId: string, newDeadline: string, reason: string) => void;
   updateProject: (projectId: string, updates: Partial<Project>) => void;
+  updateCurrentUser: (updates: Partial<User>) => Promise<void>;
   addResourceLinkToTask: (taskId: string, title: string, url: string) => void;
   removeResourceLinkFromTask: (taskId: string, linkId: string) => void;
   addResourceLinkToProject: (projectId: string, title: string, url: string) => void;
@@ -46,12 +47,11 @@ export const AppProvider = ({ children, session }: { children: ReactNode, sessio
   const [files] = useState<AppFile[]>(initialFiles);
   const [notifications, setNotifications] = useState<NotificationRecord[]>(initialNotifs);
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-
-  const currentUser = users[0];
 
   const calculateProjectProgress = (projectId: string, taskList: Task[]) => {
     const projectTasks = taskList.filter(t => t.projectId === projectId);
@@ -223,12 +223,42 @@ export const AppProvider = ({ children, session }: { children: ReactNode, sessio
     }));
   };
 
+  const updateCurrentUser = async (updates: Partial<User>) => {
+    if (!currentUser) return;
 
+    const updatedUser = { ...currentUser, ...updates };
+    setCurrentUser(updatedUser);
+
+    const { error } = await supabase
+      .from('users')
+      .update(updates)
+      .eq('id', session.user.id);
+
+    if (error) {
+      console.error('Failed to update user profile:', error);
+      // Revert on error
+      setCurrentUser(currentUser);
+    }
+  };
 
   // Load data from Supabase on mount
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Fetch current user profile from Supabase
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (userData) {
+          setCurrentUser(userData as User);
+        } else if (userError && userError.code !== 'PGRST116') {
+          // PGRST116 means no rows found, which is expected for new users
+          throw userError;
+        }
+
         // Fetch projects from Supabase
         const { data: projectsData, error: projectsError } = await supabase
           .from('projects')
@@ -249,6 +279,7 @@ export const AppProvider = ({ children, session }: { children: ReactNode, sessio
       } catch (error) {
         console.error('Failed to load data from Supabase:', error);
         // Fall back to initial data
+        setCurrentUser(users[0]);
       } finally {
         setLoading(false);
       }
@@ -328,7 +359,7 @@ export const AppProvider = ({ children, session }: { children: ReactNode, sessio
     <AppContext.Provider value={{
       projects, tasks, users, files, notifications, currentUser,
       activeTab, setActiveTab, selectedProjectId, setSelectedProjectId, selectedTaskId, setSelectedTaskId,
-      toggleTaskStatus, markNotificationRead, addProject, addTask, deleteProject, deleteTask, updateTaskDeadline, updateProject,
+      toggleTaskStatus, markNotificationRead, addProject, addTask, deleteProject, deleteTask, updateTaskDeadline, updateProject, updateCurrentUser,
       addResourceLinkToTask, removeResourceLinkFromTask, addResourceLinkToProject, removeResourceLinkFromProject,
       addTeamMemberToProject, removeTeamMemberFromProject
     }}>

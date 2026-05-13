@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FolderKanban, Calendar as CalendarIcon, FileBox, Bell, LogOut } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Calendar as CalendarIcon, FileBox, Bell, LogOut, Settings as SettingsIcon } from 'lucide-react';
 import { useAppContext } from '../AppContext';
 import { supabase } from '../lib/supabase';
 
@@ -11,6 +11,7 @@ export default function Sidebar() {
     { id: 'projects', label: 'Projects', icon: FolderKanban },
     { id: 'calendar', label: 'Calendar', icon: CalendarIcon },
     { id: 'files', label: 'Files', icon: FileBox },
+    { id: 'settings', label: 'Settings', icon: SettingsIcon },
   ];
 
   const handleNav = (id: string) => {

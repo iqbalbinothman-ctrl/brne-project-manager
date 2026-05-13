@@ -30,8 +30,8 @@ export default function Header() {
         )}
       </button>
 
-      <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden flex items-center justify-center font-bold text-sm text-gray-700 dark:text-gray-300 pointer-events-auto">
-          {currentUser?.initials}
+      <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden flex items-center justify-center font-bold text-sm text-gray-700 dark:text-gray-300 pointer-events-auto cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title={currentUser?.name || 'Profile'}>
+          {currentUser?.initials || '?'}
       </div>
     </header>
   );
