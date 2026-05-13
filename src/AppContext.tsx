@@ -222,6 +222,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
 
+
+  // Save projects to localStorage whenever they change
+  React.useEffect(() => {
+    localStorage.setItem('projects', JSON.stringify(projects));
+  }, [projects]);
+
+  // Save tasks to localStorage whenever they change
+  React.useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
+
   return (
     <AppContext.Provider value={{
       projects, tasks, users, files, notifications, currentUser,
