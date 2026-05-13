@@ -172,36 +172,6 @@ export const AppProvider = ({ children, session }: { children: ReactNode; sessio
 
   useEffect(() => {
     loadData();
-
-    const usersChannel = supabase
-      .channel('users-watch')
-      .on('postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${userId}` },
-        (payload) => setTimeout(() => setCurrentUser(payload.new as User), 100)
-      )
-      .subscribe();
-
-    const projectsChannel = supabase
-      .channel('projects-watch')
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'projects', filter: `user_id=eq.${userId}` },
-        () => loadData()
-      )
-      .subscribe();
-
-    const tasksChannel = supabase
-      .channel('tasks-watch')
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'tasks', filter: `user_id=eq.${userId}` },
-        () => loadData()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(usersChannel);
-      supabase.removeChannel(projectsChannel);
-      supabase.removeChannel(tasksChannel);
-    };
   }, [userId]);
 
   const markNotificationRead = (id: string) => {
