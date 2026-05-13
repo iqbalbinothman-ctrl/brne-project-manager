@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { Session } from '@supabase/supabase-js';
 import { Project, Task, User, AppFile, NotificationRecord } from './types';
 import { projects as initialProjects, tasks as initialTasks, users as initialUsers, files as initialFiles, notifications as initialNotifs } from './mockData';
+import { supabase } from './lib/supabase';
 
 interface AppContextType {
   projects: Project[];
@@ -37,32 +39,18 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [projects, setProjects] = useState<Project[]>(() => {
-    try {
-      const saved = localStorage.getItem('projects');
-      return saved ? JSON.parse(saved) : initialProjects;
-    } catch {
-      return initialProjects;
-    }
-  });
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    try {
-      const saved = localStorage.getItem('tasks');
-      return saved ? JSON.parse(saved) : initialTasks;
-    } catch {
-      return initialTasks;
-    }
-  });
+export const AppProvider = ({ children, session }: { children: ReactNode, session: Session }) => {
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [users] = useState<User[]>(initialUsers);
   const [files] = useState<AppFile[]>(initialFiles);
   const [notifications, setNotifications] = useState<NotificationRecord[]>(initialNotifs);
+  const [loading, setLoading] = useState(true);
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
-  // Use 'u1' as current user for demo
   const currentUser = users[0];
 
   const calculateProjectProgress = (projectId: string, taskList: Task[]) => {
@@ -237,15 +225,104 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
 
 
-  // Save projects to localStorage whenever they change
-  React.useEffect(() => {
-    localStorage.setItem('projects', JSON.stringify(projects));
-  }, [projects]);
+  // Load data from Supabase on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Fetch projects from Supabase
+        const { data: projectsData, error: projectsError } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('user_id', session.user.id);
 
-  // Save tasks to localStorage whenever they change
-  React.useEffect(() => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-  }, [tasks]);
+        if (projectsError) throw projectsError;
+        if (projectsData) setProjects(projectsData as Project[]);
+
+        // Fetch tasks from Supabase
+        const { data: tasksData, error: tasksError } = await supabase
+          .from('tasks')
+          .select('*')
+          .eq('user_id', session.user.id);
+
+        if (tasksError) throw tasksError;
+        if (tasksData) setTasks(tasksData as Task[]);
+      } catch (error) {
+        console.error('Failed to load data from Supabase:', error);
+        // Fall back to initial data
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+
+    // Subscribe to real-time updates for projects
+    const projectsChannel = supabase
+      .channel('projects')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'projects', filter: `user_id=eq.${session.user.id}` },
+        (payload) => {
+          loadData();
+        }
+      )
+      .subscribe();
+
+    // Subscribe to real-time updates for tasks
+    const tasksChannel = supabase
+      .channel('tasks')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'tasks', filter: `user_id=eq.${session.user.id}` },
+        (payload) => {
+          loadData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(projectsChannel);
+      supabase.removeChannel(tasksChannel);
+    };
+  }, [session.user.id]);
+
+  // Save projects to Supabase whenever they change
+  useEffect(() => {
+    if (loading) return;
+
+    const syncProjects = async () => {
+      for (const project of projects) {
+        const { error } = await supabase
+          .from('projects')
+          .upsert({
+            ...project,
+            user_id: session.user.id,
+          });
+
+        if (error) console.error('Failed to sync project:', error);
+      }
+    };
+
+    syncProjects();
+  }, [projects, session.user.id, loading]);
+
+  // Save tasks to Supabase whenever they change
+  useEffect(() => {
+    if (loading) return;
+
+    const syncTasks = async () => {
+      for (const task of tasks) {
+        const { error } = await supabase
+          .from('tasks')
+          .upsert({
+            ...task,
+            user_id: session.user.id,
+          });
+
+        if (error) console.error('Failed to sync task:', error);
+      }
+    };
+
+    syncTasks();
+  }, [tasks, session.user.id, loading]);
 
   return (
     <AppContext.Provider value={{

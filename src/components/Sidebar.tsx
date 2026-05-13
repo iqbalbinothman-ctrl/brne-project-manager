@@ -1,6 +1,7 @@
 import React from 'react';
 import { LayoutDashboard, FolderKanban, Calendar as CalendarIcon, FileBox, Bell, LogOut } from 'lucide-react';
 import { useAppContext } from '../AppContext';
+import { supabase } from '../lib/supabase';
 
 export default function Sidebar() {
   const { activeTab, setActiveTab, setSelectedProjectId } = useAppContext();
@@ -49,9 +50,8 @@ export default function Sidebar() {
 
       <div className="flex flex-col items-center space-y-8 mt-8">
         <button
-          onClick={() => {
-            alert('You have been logged out');
-            // In a real app, this would clear auth and redirect to login
+          onClick={async () => {
+            await supabase.auth.signOut();
           }}
           className="text-gray-400 hover:text-white transition-colors"
           title="Logout"
