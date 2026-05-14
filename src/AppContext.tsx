@@ -136,12 +136,24 @@ export const AppProvider = ({ children, session }: { children: ReactNode; sessio
       if (userData) {
         setCurrentUser(userData as User);
       } else if (userError?.code === 'PGRST116') {
-        setCurrentUser({
+        // No profile row yet — create one so projects/tasks FK is satisfied
+        const newProfile = {
           id: userId,
           email: session.user.email || '',
           name: session.user.email?.split('@')[0] || 'User',
-          initials: session.user.email?.charAt(0).toUpperCase() || '?',
-        });
+          initials: (session.user.email?.charAt(0).toUpperCase() || '?'),
+        };
+        const { data: created, error: createError } = await supabase
+          .from('users')
+          .insert(newProfile)
+          .select()
+          .single();
+        if (createError) {
+          console.error('Failed to create user profile:', createError);
+          setCurrentUser(newProfile as User);
+        } else {
+          setCurrentUser(created as User);
+        }
       } else if (userError) {
         throw userError;
       }
@@ -188,6 +200,7 @@ export const AppProvider = ({ children, session }: { children: ReactNode; sessio
 
     if (error) {
       console.error('Failed to create project:', error);
+      alert(`Failed to create project: ${error.message}`);
       // Revert
       setProjects(prev => prev.filter(p => p.id !== project.id));
     }
